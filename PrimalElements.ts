@@ -3,7 +3,7 @@ declare type TEventCallback = (ev: Event) => any
 declare type TEls = PrimalElement | Text | string | Attr | EventAttacher
 declare type TElsNodes = PrimalElement | Text | Attr | EventAttacher
 
-class EventAttacher {
+export class EventAttacher {
     constructor(
         public event: string,
         public callback: TEventCallback
@@ -16,7 +16,7 @@ class EventAttacher {
     }
 }
 
-class PrimalElement {
+export class PrimalElement {
     protected static _wizzle: any = {}
     protected static _masterTemplate = document.createElement('template')
 
@@ -104,13 +104,13 @@ class PrimalElement {
     }
 }
 
-const template = (...itens: Array<PrimalElement>) => {
+export const template = (...itens: Array<PrimalElement>) => {
     let template = document.createElement('template')
     itens.forEach(primal => template.content.appendChild(primal.raw))
     return template
 }
 
-const element =
+export const element =
     (strings: TemplateStringsArray, ...values: any[]) =>
         (...children: Array<TEls>) => {
             let tagName = strings[0].trim()
@@ -120,7 +120,7 @@ const element =
             return primal
         }
 
-const attr =
+export const attr =
     (strings: TemplateStringsArray, ...values: any[]) => {
         let attr = document.createAttribute(strings[0].trim())
         if (values[0])
@@ -128,48 +128,10 @@ const attr =
         return attr
     }
 
-const text =
+export const text =
     (strings: TemplateStringsArray, ...values: any[]) =>
         document.createTextNode(String.raw(strings, ...values))
 
-const on =
+export const on =
     (strings: TemplateStringsArray, ...values: any[]) =>
         new EventAttacher(strings[0].trim(), values[0])
-
-// @ts-ignore
-let x: any = window.x = {}
-
-document.body.append(
-    template(
-        element`style`(`
-            div {
-                color: red
-            }
-        `),
-
-        element`div`(
-            element`ul ${x} root`(
-                attr`class ${'teste'}`,
-                element`li`('texto do elemento 1'),
-                element`li  ${x} dunha`(
-                    element`img`(
-                        on`click ${console.log}`,
-                        x.test = attr`src ${'aaa'}`
-                    ),
-                    text`aaaaaaaaaaa`,
-                ),
-                element`li`('texto do elemento 3'),
-            ),
-            element`div`()
-        )
-    ).content
-)
-
-let k = element`img`(attr`src ${'lllllllllllllllllllllll'}`)
-x.dunha.append(k)
-
-x.root.append( x.dunha.clone() )
-x.root.append( x.dunha.clone() )
-x.root.append( x.dunha.clone() )
-x.root.append( x.dunha.clone() )
-x.root.append( x.dunha.clone() )
