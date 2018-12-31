@@ -1,7 +1,10 @@
 declare type TEventAttacher = { event: string, callback: TEventCallback }
 declare type TEventCallback = (ev: Event) => any
-declare type TEls = PrimalElement | Text | string | Attr | EventAttacher
+declare type TEls = PrimalElement | Text | Attr | EventAttacher | string
 declare type TElsNodes = PrimalElement | Text | Attr | EventAttacher
+
+export declare type TElsNodeList = { [name: string]: TElsNodes }
+export declare type PrimalElementList = { [name: string]: PrimalElement }
 
 export class EventAttacher {
     constructor(
@@ -34,6 +37,10 @@ export class PrimalElement {
     ) {
         PrimalElement._masterTemplate.content.append(this._htmlElement)
         children.forEach(child => this.append(child))
+    }
+
+    get children() {
+        return this._children
     }
 
     get raw(): HTMLElement {
@@ -91,7 +98,7 @@ export class PrimalElement {
             return e.cloneNode()
         })
         // @ts-ignore
-        return new PrimalElement(this._tagName, ... properties)
+        return new PrimalElement(this._tagName, ...properties)
     }
 
     edit() {
@@ -103,6 +110,36 @@ export class PrimalElement {
         this._palaceholder.replaceWith(this.raw)
     }
 }
+
+// --- DECORATORS --------------------------------------------------------------
+
+export const component =
+    (options = {}) =>
+        (constructor: any) => {
+            let name = constructor.name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase()
+            window.customElements.define(name, constructor, options)
+        }
+
+export const observeAttribute =
+    (target: Object, key: string, descriptor: PropertyDescriptor) => {
+        let constructor = <any>target.constructor
+        if (constructor.observedAttributes instanceof Array) {
+            constructor.observedAttributes.push(key)
+        } else {
+            constructor.observedAttributes = [key]
+            let proto = constructor.prototype
+            let origFunc = proto.attributeChangedCallback || null
+
+            proto.attributeChangedCallback = function (name: string, oldValue: any, newValue: any) {
+                if (this[name] && this[name] instanceof Function)
+                    this[name](oldValue, newValue)
+                if (origFunc)
+                    origFunc.bind(this)(name, oldValue, newValue)
+            }
+        }
+    }
+    
+// -----------------------------------------------------------------------------
 
 export const template = (...itens: Array<PrimalElement>) => {
     let template = document.createElement('template')
@@ -120,18 +157,28 @@ export const element =
             return primal
         }
 
-export const attr =
+export const css =
     (strings: TemplateStringsArray, ...values: any[]) => {
-        let attr = document.createAttribute(strings[0].trim())
-        if (values[0])
-            attr.value = values[0]
-        return attr
+        let text = String.raw(strings, ...values)
+        let primal = new PrimalElement('style', text)
+        return primal
     }
 
+const genAttr = (attrName: string, attrValue: any) => {
+    let attr = document.createAttribute(attrName)
+    if (attrValue)
+        attr.value = attrValue
+    return attr
+}
+
+export const attr =
+    (strings: TemplateStringsArray, ...values: any[]) => genAttr(strings[0].trim(), values[0])
+
+
 export const text =
-    (strings: TemplateStringsArray, ...values: any[]) =>
+    (strings: TemplateStringsArray, ...values: any[]): Text =>
         document.createTextNode(String.raw(strings, ...values))
 
-export const on =
+export const evnt =
     (strings: TemplateStringsArray, ...values: any[]) =>
         new EventAttacher(strings[0].trim(), values[0])
