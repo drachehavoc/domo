@@ -1,4 +1,4 @@
-import { TDomoElementsTypes, TEventCallback, TDomoElementType } from "./Domo.d";
+import { TDomoElementsTypes } from "./Domo.d";
 import { Creator } from "./Creators.js";
 import { DomoEvent } from "./DomoEvent";
 import { DomoElement } from "./DomoElement";
@@ -49,7 +49,7 @@ export const data =
 
 export const evnt =
     (astrs: TemplateStringsArray, ...avals: any[]) =>
-        (_: any, callback: TEventCallback, captureOrOptions: any | boolean = false): DomoEvent =>
+        (_: any, callback: EventListener, captureOrOptions: any | boolean = false): DomoEvent =>
             Creator.evnt(
                 String.raw(astrs, ...avals),
                 callback,

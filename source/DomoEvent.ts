@@ -1,9 +1,7 @@
-import { TEventCallback } from "./Domo.d";
-
 export class DomoEvent {
     constructor(
         private _eventname: string,
-        private _callback: TEventCallback,
+        private _callback: EventListener,
         private captureOrOptions: any | boolean = false
     ) {
     }

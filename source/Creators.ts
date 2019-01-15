@@ -1,4 +1,4 @@
-import { TDomoElementsTypes, TEventCallback } from './Domo.d'
+import { TDomoElementsTypes } from './Domo.d'
 import { DomoElement } from './DomoElement.js'
 import { DomoEvent } from './DomoEvent.js';
 
@@ -35,7 +35,7 @@ export class Creator {
 
     static evnt(
         eventname: string,
-        callback: TEventCallback,
+        callback: EventListener,
         captureOrOptions: any | boolean = false
     ): DomoEvent {
         return new DomoEvent(eventname, callback, captureOrOptions)
