@@ -1,4 +1,4 @@
-import { TDomoElementsTypes } from "./Domo.d";
+import { TDomoElementType } from "./Domo.d";
 import { Creator } from "./Creators.js";
 import { DomoEvent } from "./DomoEvent";
 import { DomoElement } from "./DomoElement";
@@ -12,8 +12,25 @@ export const template =
 
 export const domo =
     (strs: TemplateStringsArray, ...vals: any[]) =>
-        (...p: TDomoElementsTypes)
-            : DomoElement => Creator.domo(String.raw(strs, ...vals), ...p)
+        (...p: Array<TDomoElementType | string>): DomoElement => {
+            let str = String.raw(strs, ...vals)
+            let tag = <string[]>str.match(/([\w-]*)[\.\#]{0,1}/)
+            let id = <string[]>str.match(/#([\w-]*)/)
+            let cl = <string[]>str.match(/\.([\w-.]*)/)
+            let at
+            let ats = /\[['"]{0,1}([\w\s-]+?)['"]{0,1}=['"]{0,1}([\w\s-]+?)['"]{0,1}\]/gm
+
+            if (id)
+                p.push(attr`id``${id[1]}`)
+
+            if (cl)
+                p.push(attr`class``${cl[1].replace(/\./g, ' ')}`)
+
+            while (at = ats.exec(str))
+                p.push(attr`${at[1]}``${at[2]}`)
+
+            return Creator.domo(tag[1], ...p)
+        }
 
 export const css =
     (strs: TemplateStringsArray, ...vals: any[])

@@ -1,4 +1,4 @@
-import { TDomoElementsTypes } from './Domo.d'
+import { TDomoElementType } from './Domo.d'
 import { DomoElement } from './DomoElement.js'
 import { DomoEvent } from './DomoEvent.js';
 
@@ -13,7 +13,7 @@ export class Creator {
 
     static domo(
         tagname: string,
-        ...elements: TDomoElementsTypes
+        ...elements: Array<TDomoElementType | string>
     ) {
         return new DomoElement(tagname, ...elements)
     }
